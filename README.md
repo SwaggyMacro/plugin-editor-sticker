@@ -16,6 +16,7 @@
 ![默认编辑器表情面板](./screenshots/img_0.png)
 ![Vditor 编辑器表情面板](./screenshots/img_1.png)
 ![文章内渲染效果](./screenshots/img_2.png)
+![自定义表情包管理界面](./screenshots/img_3.png)
 
 > 默认编辑器的表情包按钮在工具栏，其余编辑器在右下角（DOM 注入）。
 
