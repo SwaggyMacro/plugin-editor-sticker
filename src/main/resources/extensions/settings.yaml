@@ -16,6 +16,7 @@ spec:
           name: stickerConfigUrl
           label: 表情包配置 URL
           help: "OwO 格式的表情包配置 JSON 文件地址，留空使用默认表情（自定义模式下此配置无效）"
+          value: "https://raw.githubusercontent.com/SwaggyMacro/OwO_Stickers/refs/heads/main/OwO.min.json"
           placeholder: "https://example.com/owo.json"
         - $formkit: text
           name: inlineMaxWidth
