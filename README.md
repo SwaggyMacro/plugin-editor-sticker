@@ -13,8 +13,11 @@
 - 🚫 转义支持：使用 `\:xxx\:` 显示原始短代码文本
 
 ## 📸 截图预览
+![默认编辑器表情面板](./screenshots/img_0.png)
+![Vditor 编辑器表情面板](./screenshots/img_1.png)
+![文章内渲染效果](./screenshots/img_2.png)
 
-<!-- 可以添加截图 -->
+> 默认编辑器的表情包按钮在工具栏，其余编辑器在右下角（DOM 注入）。
 
 ## 📦 安装
 
@@ -102,12 +105,15 @@ pnpm dev
     "container": [
       {
         "text": "shortcode",
-        "icon": "https://example.com/sticker.png"
+        "icon": "<img src='//example.com/sticker.png' origin='//example.com/sticker.png'>"
       }
     ]
   }
 }
 ```
+> origin 字段可选，用于指定原始图片地址。  
+> 当 origin 字段存在时，渲染时使用 origin 地址，src 用于预览。  
+> (用于当原图文件过大时，可以使用压缩图预览)
 
 ## 🤝 贡献
 
