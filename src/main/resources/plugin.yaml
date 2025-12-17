@@ -1,0 +1,23 @@
+# Refer https://docs.halo.run/developer-guide/plugin/basics/manifest
+
+apiVersion: plugin.halo.run/v1alpha1
+kind: Plugin
+metadata:
+  name: editor-sticker
+spec:
+  enabled: true
+  requires: ">=2.21.0"
+  author:
+    name: SwaggyMacro
+    website: https://github.com/SwaggyMacro
+  logo: logo.png
+  homepage: https://github.com/SwaggyMacro/editor-sticker#readme
+  repo: https://github.com/SwaggyMacro/editor-sticker
+  issues: https://github.com/SwaggyMacro/editor-sticker/issues
+  displayName: "编辑器表情包"
+  description: "为 Halo 编辑器添加 OwO 表情包面板，支持默认编辑器和 Vditor 编辑器"
+  license:
+    - name: "GPL-3.0"
+      url: "https://github.com/SwaggyMacro/editor-sticker/blob/main/LICENSE"
+  settingName: editor-sticker-settings
+  configMapName: editor-sticker-configmap

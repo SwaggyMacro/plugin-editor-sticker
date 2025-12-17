@@ -1,0 +1,69 @@
+apiVersion: v1alpha1
+kind: Setting
+metadata:
+  name: editor-sticker-settings
+spec:
+  forms:
+    - group: basic
+      label: 基本设置
+      formSchema:
+        - $formkit: checkbox
+          name: enableCustomMode
+          label: 启用自定义模式
+          value: false
+          help: "启用后将使用自定义表情管理，忽略下方的配置 URL"
+        - $formkit: text
+          name: stickerConfigUrl
+          label: 表情包配置 URL
+          help: "OwO 格式的表情包配置 JSON 文件地址，留空使用默认表情（自定义模式下此配置无效）"
+          placeholder: "https://example.com/owo.json"
+        - $formkit: text
+          name: inlineMaxWidth
+          label: 内联最大宽度
+          help: "表情与文字并排时的最大宽度，如 64px、auto 等"
+          value: "64px"
+          placeholder: "64px"
+        - $formkit: text
+          name: inlineMaxHeight
+          label: 内联最大高度
+          help: "表情与文字并排时的最大高度，如 64px、auto 等"
+          value: "64px"
+          placeholder: "64px"
+        - $formkit: text
+          name: soloMaxWidth
+          label: 独占行最大宽度
+          help: "表情独占一行时的最大宽度，如 256px、auto 等"
+          value: "256px"
+          placeholder: "256px"
+        - $formkit: text
+          name: soloMaxHeight
+          label: 独占行最大高度
+          help: "表情独占一行时的最大高度，如 256px、auto 等"
+          value: "256px"
+          placeholder: "256px"
+        - $formkit: textarea
+          name: stickerStyle
+          label: 额外样式
+          help: "自定义表情的额外 CSS 样式"
+          value: ""
+          rows: 2
+        - $formkit: checkbox
+          name: enableDefaultEditor
+          label: 启用默认编辑器支持
+          value: true
+          help: "为 Halo 默认编辑器添加表情面板"
+        - $formkit: checkbox
+          name: enableVditorEditor
+          label: 启用 Vditor 编辑器支持
+          value: true
+          help: "为 Vditor 编辑器添加表情面板"
+        - $formkit: checkbox
+          name: enableBytemdEditor
+          label: 启用 ByteMD 编辑器支持
+          value: true
+          help: "为 ByteMD 编辑器添加表情面板"
+        - $formkit: checkbox
+          name: enableWillowEditor
+          label: 启用 Willow MDE 编辑器支持
+          value: true
+          help: "为 Willow Markdown 编辑器添加表情面板"

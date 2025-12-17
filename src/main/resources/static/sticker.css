@@ -1,0 +1,66 @@
+/* 表情包默认样式（与文字并排）- 使用超高优先级选择器覆盖主题样式 */
+img.sticker-emoji[class],
+img[class].sticker-emoji,
+img.sticker-emoji,
+p img.sticker-emoji,
+div img.sticker-emoji,
+span img.sticker-emoji,
+.content img.sticker-emoji,
+.post-content img.sticker-emoji,
+.article-content img.sticker-emoji,
+.entry-content img.sticker-emoji,
+.markdown-body img.sticker-emoji,
+.post img.sticker-emoji,
+.post-body img.sticker-emoji,
+.single-content img.sticker-emoji,
+.page-content img.sticker-emoji,
+.hentry img.sticker-emoji,
+article img.sticker-emoji,
+article p img.sticker-emoji,
+article div img.sticker-emoji,
+main img.sticker-emoji,
+#content img.sticker-emoji,
+#main img.sticker-emoji,
+#post img.sticker-emoji,
+[class*="content"] img.sticker-emoji,
+[class*="article"] img.sticker-emoji,
+[class*="post"] img.sticker-emoji {
+    max-width: var(--sticker-inline-max-width, 64px) !important;
+    max-height: var(--sticker-inline-max-height, 64px) !important;
+    width: auto !important;
+    height: auto !important;
+    display: inline !important;
+    vertical-align: middle !important;
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 2px !important;
+    padding: 0 !important;
+    object-fit: contain !important;
+}
+
+/* 表情包独占一行时放大 - 超高优先级 */
+p.sticker-solo-container img.sticker-emoji,
+p.sticker-solo-container img.sticker-emoji[class],
+img.sticker-emoji.sticker-solo-image,
+img.sticker-emoji.sticker-solo-image[class],
+.content p.sticker-solo-container img.sticker-emoji,
+.post-content p.sticker-solo-container img.sticker-emoji,
+.article-content p.sticker-solo-container img.sticker-emoji,
+.entry-content p.sticker-solo-container img.sticker-emoji,
+.markdown-body p.sticker-solo-container img.sticker-emoji,
+article p.sticker-solo-container img.sticker-emoji,
+main p.sticker-solo-container img.sticker-emoji,
+[class*="content"] p.sticker-solo-container img.sticker-emoji,
+[class*="article"] p.sticker-solo-container img.sticker-emoji,
+[class*="post"] p.sticker-solo-container img.sticker-emoji,
+.content img.sticker-emoji.sticker-solo-image,
+.post-content img.sticker-emoji.sticker-solo-image,
+.article-content img.sticker-emoji.sticker-solo-image,
+.markdown-body img.sticker-emoji.sticker-solo-image,
+article img.sticker-emoji.sticker-solo-image {
+    max-width: var(--sticker-solo-max-width, 256px) !important;
+    max-height: var(--sticker-solo-max-height, 256px) !important;
+}
+
+

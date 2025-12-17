@@ -1,0 +1,19 @@
+apiVersion: v1alpha1
+kind: ConfigMap
+metadata:
+  name: editor-sticker-configmap
+data:
+  basic: |
+    {
+      "enableCustomMode": false,
+      "stickerConfigUrl": "https://raw.githubusercontent.com/SwaggyMacro/OwO_Stickers/refs/heads/main/OwO.min.json",
+      "inlineMaxWidth": "64px",
+      "inlineMaxHeight": "64px",
+      "soloMaxWidth": "256px",
+      "soloMaxHeight": "256px",
+      "stickerStyle": "",
+      "enableDefaultEditor": true,
+      "enableVditorEditor": true,
+      "enableBytemdEditor": true,
+      "enableWillowEditor": true
+    }
