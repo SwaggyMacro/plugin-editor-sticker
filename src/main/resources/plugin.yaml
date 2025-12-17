@@ -15,7 +15,7 @@ spec:
   repo: https://github.com/SwaggyMacro/editor-sticker
   issues: https://github.com/SwaggyMacro/editor-sticker/issues
   displayName: "编辑器表情包"
-  description: "为 Halo 编辑器添加 OwO 表情包面板，支持默认编辑器和 Vditor 编辑器"
+  description: "为 Halo 编辑器添加 OwO 表情包面板，支持默认编辑器、Vditor、ByteMD、Willow。"
   license:
     - name: "GPL-3.0"
       url: "https://github.com/SwaggyMacro/editor-sticker/blob/main/LICENSE"
