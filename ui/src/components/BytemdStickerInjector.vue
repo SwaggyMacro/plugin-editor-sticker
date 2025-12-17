@@ -13,7 +13,20 @@ const panelPosition = ref({ top: 0, left: 0 })
 
 let observer: MutationObserver | null = null
 
+// 编辑器页面路由匹配
+const isEditorRoute = () => {
+  const path = window.location.pathname
+  return path.includes('/posts/editor') || 
+         path.includes('/pages/editor') || 
+         path.includes('/singlepages/editor')
+}
+
 const checkBytemdPage = () => {
+  // 先检查路由，再检查编辑器元素
+  if (!isEditorRoute()) {
+    isBytemdPage.value = false
+    return
+  }
   // ByteMD 编辑器的容器选择器
   const bytemd = document.querySelector('.bytemd') || document.querySelector('[class*="bytemd"]')
   isBytemdPage.value = !!bytemd
@@ -137,6 +150,21 @@ onMounted(async () => {
     subtree: true
   })
   
+  // 监听路由变化
+  window.addEventListener('popstate', checkBytemdPage)
+  window.addEventListener('hashchange', checkBytemdPage)
+  
+  const originalPushState = history.pushState
+  const originalReplaceState = history.replaceState
+  history.pushState = function(...args) {
+    originalPushState.apply(this, args)
+    setTimeout(checkBytemdPage, 50)
+  }
+  history.replaceState = function(...args) {
+    originalReplaceState.apply(this, args)
+    setTimeout(checkBytemdPage, 50)
+  }
+  
   document.addEventListener('click', handleClickOutside)
 })
 
@@ -144,6 +172,8 @@ onUnmounted(() => {
   if (observer) {
     observer.disconnect()
   }
+  window.removeEventListener('popstate', checkBytemdPage)
+  window.removeEventListener('hashchange', checkBytemdPage)
   document.removeEventListener('click', handleClickOutside)
 })
 </script>

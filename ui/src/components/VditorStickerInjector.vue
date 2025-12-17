@@ -14,7 +14,20 @@ const panelPosition = ref({ top: 0, left: 0 })
 // 监听 Vditor 编辑器的出现
 let observer: MutationObserver | null = null
 
+// 编辑器页面路由匹配
+const isEditorRoute = () => {
+  const path = window.location.pathname
+  return path.includes('/posts/editor') || 
+         path.includes('/pages/editor') || 
+         path.includes('/singlepages/editor')
+}
+
 const checkVditorPage = () => {
+  // 先检查路由，再检查编辑器元素
+  if (!isEditorRoute()) {
+    isVditorPage.value = false
+    return
+  }
   const vditor = document.querySelector('#plugin-vditor-mde')
   isVditorPage.value = !!vditor
 }
@@ -130,6 +143,22 @@ onMounted(async () => {
     childList: true,
     subtree: true
   })
+  
+  // 监听路由变化 (popstate 和 hashchange)
+  window.addEventListener('popstate', checkVditorPage)
+  window.addEventListener('hashchange', checkVditorPage)
+  
+  // 监听 history.pushState 和 replaceState
+  const originalPushState = history.pushState
+  const originalReplaceState = history.replaceState
+  history.pushState = function(...args) {
+    originalPushState.apply(this, args)
+    setTimeout(checkVditorPage, 50)
+  }
+  history.replaceState = function(...args) {
+    originalReplaceState.apply(this, args)
+    setTimeout(checkVditorPage, 50)
+  }
   
   document.addEventListener('click', handleClickOutside)
 })

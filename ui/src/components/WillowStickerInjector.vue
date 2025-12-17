@@ -13,7 +13,20 @@ const panelPosition = ref({ top: 0, left: 0 })
 
 let observer: MutationObserver | null = null
 
+// 编辑器页面路由匹配
+const isEditorRoute = () => {
+  const path = window.location.pathname
+  return path.includes('/posts/editor') || 
+         path.includes('/pages/editor') || 
+         path.includes('/singlepages/editor')
+}
+
 const checkWillowPage = () => {
+  // 先检查路由，再检查编辑器元素
+  if (!isEditorRoute()) {
+    isWillowPage.value = false
+    return
+  }
   // Willow MDE 编辑器的容器选择器
   const willow = document.querySelector('.willow-mde') || 
                  document.querySelector('[class*="willow"]') ||
@@ -144,6 +157,21 @@ onMounted(async () => {
     subtree: true
   })
   
+  // 监听路由变化
+  window.addEventListener('popstate', checkWillowPage)
+  window.addEventListener('hashchange', checkWillowPage)
+  
+  const originalPushState = history.pushState
+  const originalReplaceState = history.replaceState
+  history.pushState = function(...args) {
+    originalPushState.apply(this, args)
+    setTimeout(checkWillowPage, 50)
+  }
+  history.replaceState = function(...args) {
+    originalReplaceState.apply(this, args)
+    setTimeout(checkWillowPage, 50)
+  }
+  
   document.addEventListener('click', handleClickOutside)
 })
 
@@ -151,6 +179,8 @@ onUnmounted(() => {
   if (observer) {
     observer.disconnect()
   }
+  window.removeEventListener('popstate', checkWillowPage)
+  window.removeEventListener('hashchange', checkWillowPage)
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
