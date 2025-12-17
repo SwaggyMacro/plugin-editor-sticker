@@ -22,7 +22,7 @@
 
 ## 📦 安装
 
-1. 下载最新的 [Release](https://github.com/SwaggyMacro/editor-sticker/releases) 版本
+1. 下载最新的 [Release](https://github.com/SwaggyMacro/plugin-editor-sticker/releases) 版本
 2. 在 Halo 后台 -> 插件 -> 安装，上传 jar 文件
 3. 启用插件
 
