@@ -13,6 +13,8 @@
 - 🚫 转义支持：使用 `\:xxx\:` 显示原始短代码文本
 
 ## 📸 截图预览
+> 可在 [https://b.ncii.cn/archives/nWlKbnGX](https://b.ncii.cn/archives/nWlKbnGX) 查看文章效果
+
 ![默认编辑器表情面板](./screenshots/img_0.png)
 ![Vditor 编辑器表情面板](./screenshots/img_1.png)
 ![文章内渲染效果](./screenshots/img_2.png)
