@@ -6,7 +6,7 @@ metadata:
   name: editor-sticker
 spec:
   enabled: true
-  requires: ">=2.21.0"
+  requires: ">=2.22.0"
   author:
     name: SwaggyMacro
     website: https://github.com/SwaggyMacro
