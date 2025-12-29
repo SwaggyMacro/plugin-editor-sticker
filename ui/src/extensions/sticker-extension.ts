@@ -1,5 +1,5 @@
 import { Extension, type Editor } from '@halo-dev/richtext-editor'
-import type { ExtensionOptions, ToolbarItemType, ToolboxItemType } from '@halo-dev/richtext-editor'
+import type { ExtensionOptions, ToolbarItemType } from '@halo-dev/richtext-editor'
 import { markRaw, type Component } from 'vue'
 import StickerToolbarItem from '@/components/StickerToolbarItem.vue'
 
@@ -14,21 +14,6 @@ const stickerExtensionOptions: ExtensionOptions = {
         props: {
           editor,
           isActive: false,
-        },
-      },
-    ]
-  },
-
-  // 工具箱项
-  getToolboxItems({ editor }: { editor: Editor }): ToolboxItemType[] {
-    return [
-      {
-        priority: 200,
-        component: markRaw(StickerToolbarItem as Component),
-        props: {
-          editor,
-          title: '表情',
-          description: '插入表情包',
         },
       },
     ]

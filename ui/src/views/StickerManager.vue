@@ -33,6 +33,11 @@ const showOriginSelector = ref(false)
 // 多选模式
 const selectMode = ref(false)
 const selectedIndexes = ref<Set<number>>(new Set())
+const lastSelectedIndex = ref<number>(-1)
+
+// 拖拽排序
+const dragIndex = ref<number>(-1)
+const dragOverIndex = ref<number>(-1)
 
 // 编辑模式
 const showEditStickerModal = ref(false)
@@ -377,15 +382,27 @@ const toggleSelectMode = () => {
   selectMode.value = !selectMode.value
   if (!selectMode.value) {
     selectedIndexes.value.clear()
+    lastSelectedIndex.value = -1
   }
 }
 
-// 切换选中状态
-const toggleSelect = (index: number) => {
-  if (selectedIndexes.value.has(index)) {
-    selectedIndexes.value.delete(index)
+// 切换选中状态（支持 Shift 连续选择）
+const toggleSelect = (index: number, event?: MouseEvent) => {
+  // Shift + 点击：连续选择
+  if (event?.shiftKey && lastSelectedIndex.value !== -1) {
+    const start = Math.min(lastSelectedIndex.value, index)
+    const end = Math.max(lastSelectedIndex.value, index)
+    for (let i = start; i <= end; i++) {
+      selectedIndexes.value.add(i)
+    }
   } else {
-    selectedIndexes.value.add(index)
+    // 普通点击：切换选中状态
+    if (selectedIndexes.value.has(index)) {
+      selectedIndexes.value.delete(index)
+    } else {
+      selectedIndexes.value.add(index)
+    }
+    lastSelectedIndex.value = index
   }
 }
 
@@ -419,6 +436,142 @@ const deleteSelected = () => {
       await saveData()
     }
   })
+}
+
+// 移动选中项到顶部
+const moveSelectedToTop = async () => {
+  if (!currentGroup.value || selectedIndexes.value.size === 0) return
+  
+  const container = currentGroup.value.container
+  const indexes = Array.from(selectedIndexes.value).sort((a, b) => a - b)
+  const items = indexes.map(i => container[i])
+  
+  // 从大到小删除，避免索引变化
+  Array.from(selectedIndexes.value).sort((a, b) => b - a).forEach(i => {
+    container.splice(i, 1)
+  })
+  
+  // 插入到顶部
+  container.unshift(...items)
+  
+  // 更新选中索引
+  selectedIndexes.value = new Set(items.map((_, i) => i))
+  await saveData()
+}
+
+// 移动选中项到底部
+const moveSelectedToBottom = async () => {
+  if (!currentGroup.value || selectedIndexes.value.size === 0) return
+  
+  const container = currentGroup.value.container
+  const indexes = Array.from(selectedIndexes.value).sort((a, b) => a - b)
+  const items = indexes.map(i => container[i])
+  
+  // 从大到小删除，避免索引变化
+  Array.from(selectedIndexes.value).sort((a, b) => b - a).forEach(i => {
+    container.splice(i, 1)
+  })
+  
+  // 插入到底部
+  container.push(...items)
+  
+  // 更新选中索引
+  const startIndex = container.length - items.length
+  selectedIndexes.value = new Set(items.map((_, i) => startIndex + i))
+  await saveData()
+}
+
+// 拖拽开始
+const handleDragStart = (e: DragEvent, index: number) => {
+  // 多选模式下，如果拖拽的是选中项，则拖拽所有选中项
+  if (selectMode.value && selectedIndexes.value.has(index)) {
+    dragIndex.value = index
+    // 设置拖拽数据
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = 'move'
+      e.dataTransfer.setData('text/plain', Array.from(selectedIndexes.value).join(','))
+    }
+  } else if (!selectMode.value) {
+    dragIndex.value = index
+  }
+}
+
+// 拖拽经过
+const handleDragOver = (e: DragEvent, index: number) => {
+  e.preventDefault()
+  if (e.dataTransfer) {
+    e.dataTransfer.dropEffect = 'move'
+  }
+  dragOverIndex.value = index
+}
+
+// 拖拽离开
+const handleDragLeave = () => {
+  dragOverIndex.value = -1
+}
+
+// 拖拽结束
+const handleDragEnd = () => {
+  dragIndex.value = -1
+  dragOverIndex.value = -1
+}
+
+// 放置
+const handleDrop = async (e: DragEvent, index: number) => {
+  e.preventDefault()
+  
+  if (!currentGroup.value || dragIndex.value === -1) {
+    dragIndex.value = -1
+    dragOverIndex.value = -1
+    return
+  }
+  
+  const container = currentGroup.value.container
+  
+  // 多选模式下拖拽选中项
+  if (selectMode.value && selectedIndexes.value.size > 0 && selectedIndexes.value.has(dragIndex.value)) {
+    const indexes = Array.from(selectedIndexes.value).sort((a, b) => a - b)
+    
+    // 如果目标位置在选中项中，不做任何操作
+    if (selectedIndexes.value.has(index)) {
+      dragIndex.value = -1
+      dragOverIndex.value = -1
+      return
+    }
+    
+    const items = indexes.map(i => container[i])
+    
+    // 计算目标位置（考虑删除后的索引变化）
+    let targetIndex = index
+    const deletedBefore = indexes.filter(i => i < index).length
+    targetIndex -= deletedBefore
+    
+    // 从大到小删除
+    indexes.sort((a, b) => b - a).forEach(i => {
+      container.splice(i, 1)
+    })
+    
+    // 插入到目标位置
+    container.splice(targetIndex, 0, ...items)
+    
+    // 更新选中索引
+    selectedIndexes.value = new Set(items.map((_, i) => targetIndex + i))
+  } else if (!selectMode.value) {
+    // 单个拖拽
+    if (dragIndex.value === index) {
+      dragIndex.value = -1
+      dragOverIndex.value = -1
+      return
+    }
+    
+    const item = container.splice(dragIndex.value, 1)[0]
+    const targetIndex = dragIndex.value < index ? index - 1 : index
+    container.splice(targetIndex, 0, item)
+  }
+  
+  dragIndex.value = -1
+  dragOverIndex.value = -1
+  await saveData()
 }
 
 const getStickerPreview = (item: StickerItem, type: string) => {
@@ -499,11 +652,17 @@ onMounted(loadData)
           <div v-if="!activeGroup" class="empty-tip">请选择或创建一个分组</div>
           <template v-else-if="currentGroup">
             <div class="sticker-header">
-              <span>{{ activeGroup }} ({{ currentGroup.container.length }} 个表情)</span>
+              <span>{{ activeGroup }} ({{ currentGroup.container.length }} 个表情)<template v-if="selectMode && selectedIndexes.size > 0">，已选 {{ selectedIndexes.size }} 个</template></span>
               <VSpace>
                 <template v-if="selectMode">
                   <VButton size="sm" @click="toggleSelectAll">
                     {{ selectedIndexes.size === currentGroup.container.length ? '取消全选' : '全选' }}
+                  </VButton>
+                  <VButton size="sm" :disabled="selectedIndexes.size === 0" @click="moveSelectedToTop">
+                    移至顶部
+                  </VButton>
+                  <VButton size="sm" :disabled="selectedIndexes.size === 0" @click="moveSelectedToBottom">
+                    移至底部
                   </VButton>
                   <VButton size="sm" type="danger" :disabled="selectedIndexes.size === 0" @click="deleteSelected">
                     删除 ({{ selectedIndexes.size }})
@@ -524,12 +683,23 @@ onMounted(loadData)
                 v-for="(item, index) in currentGroup.container"
                 :key="index"
                 class="sticker-item"
-                :class="{ selected: selectMode && selectedIndexes.has(index) }"
-                @click="selectMode ? toggleSelect(index) : undefined"
+                :class="{ 
+                  selected: selectMode && selectedIndexes.has(index),
+                  dragging: dragIndex === index || (selectMode && selectedIndexes.has(index) && dragIndex !== -1 && selectedIndexes.has(dragIndex)),
+                  'drag-over': dragOverIndex === index && dragIndex !== index && !(selectMode && selectedIndexes.has(index))
+                }"
+                :draggable="!selectMode || selectedIndexes.has(index)"
+                @click="selectMode ? toggleSelect(index, $event) : undefined"
+                @dragstart="handleDragStart($event, index)"
+                @dragover="handleDragOver($event, index)"
+                @dragleave="handleDragLeave"
+                @dragend="handleDragEnd"
+                @drop="handleDrop($event, index)"
               >
                 <div v-if="selectMode" class="select-checkbox" :class="{ checked: selectedIndexes.has(index) }">
                   <span v-if="selectedIndexes.has(index)">✓</span>
                 </div>
+                <div v-if="!selectMode" class="drag-handle" title="拖拽排序">⋮⋮</div>
                 <template v-if="currentGroup.type === 'emoticon'">
                   <span class="emoticon">{{ item.icon }}</span>
                 </template>
@@ -790,10 +960,50 @@ onMounted(loadData)
     background: #eff6ff;
   }
   
+  &.dragging {
+    opacity: 0.5;
+    border-style: dashed;
+  }
+  
+  &.drag-over {
+    border-color: #3b82f6;
+    background: #dbeafe;
+    transform: scale(1.02);
+  }
+  
+  &[draggable="true"] {
+    cursor: grab;
+    
+    &:active {
+      cursor: grabbing;
+    }
+  }
+  
+  .drag-handle {
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #d1d5db;
+    letter-spacing: -2px;
+    cursor: grab;
+    user-select: none;
+    
+    &:active {
+      cursor: grabbing;
+    }
+  }
+  
+  &:hover .drag-handle {
+    color: #9ca3af;
+  }
+  
   img {
     width: 48px;
     height: 48px;
     object-fit: contain;
+    pointer-events: none;
   }
   
   .emoticon {
@@ -801,6 +1011,7 @@ onMounted(loadData)
     height: 48px;
     display: flex;
     align-items: center;
+    pointer-events: none;
   }
   
   .sticker-name {
@@ -811,6 +1022,7 @@ onMounted(loadData)
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    pointer-events: none;
   }
   
   .select-checkbox {
