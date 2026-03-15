@@ -35,22 +35,22 @@ public class StickerHeadProcessor implements TemplateHeadProcessor {
             String stickerStyle = "";
 
             try {
-                var setting = settingFetcher.get("basic");
+                var setting = settingFetcher.getSettingValue("basic");
                 if (setting != null) {
                     if (setting.has("inlineMaxWidth")) {
-                        inlineMaxWidth = setting.get("inlineMaxWidth").asText("64px");
+                        inlineMaxWidth = setting.get("inlineMaxWidth").asString("64px");
                     }
                     if (setting.has("inlineMaxHeight")) {
-                        inlineMaxHeight = setting.get("inlineMaxHeight").asText("64px");
+                        inlineMaxHeight = setting.get("inlineMaxHeight").asString("64px");
                     }
                     if (setting.has("soloMaxWidth")) {
-                        soloMaxWidth = setting.get("soloMaxWidth").asText("256px");
+                        soloMaxWidth = setting.get("soloMaxWidth").asString("256px");
                     }
                     if (setting.has("soloMaxHeight")) {
-                        soloMaxHeight = setting.get("soloMaxHeight").asText("256px");
+                        soloMaxHeight = setting.get("soloMaxHeight").asString("256px");
                     }
                     if (setting.has("stickerStyle")) {
-                        stickerStyle = setting.get("stickerStyle").asText("");
+                        stickerStyle = setting.get("stickerStyle").asString("");
                     }
                 }
             } catch (Exception e) {
