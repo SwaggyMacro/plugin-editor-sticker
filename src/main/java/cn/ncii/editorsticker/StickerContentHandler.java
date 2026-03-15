@@ -125,7 +125,10 @@ public class StickerContentHandler implements ReactivePostContentHandler {
         return client.fetch(run.halo.app.extension.ConfigMap.class, "editor-sticker-custom-data")
             .map(configMap -> {
                 try {
-                    String data = configMap.getData().get("stickers");
+                    String data = null;
+                    if (configMap.getData() != null) {
+                        data = configMap.getData().get("stickers");
+                    }
                     if (data == null || data.isEmpty()) {
                         return Map.<String, String>of();
                     }
