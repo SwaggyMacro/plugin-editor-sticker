@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useStickers } from '@/composables/useStickers'
 import type { Sticker } from '@/types/sticker'
 import StickerPanel from './StickerPanel.vue'
@@ -17,9 +17,11 @@ let observer: MutationObserver | null = null
 // 编辑器页面路由匹配
 const isEditorRoute = () => {
   const path = window.location.pathname
-  return path.includes('/posts/editor') || 
-         path.includes('/pages/editor') || 
-         path.includes('/singlepages/editor')
+  return (
+    path.includes('/posts/editor') ||
+    path.includes('/pages/editor') ||
+    path.includes('/singlepages/editor')
+  )
 }
 
 const checkVditorPage = () => {
@@ -34,31 +36,31 @@ const checkVditorPage = () => {
 
 const updatePanelPosition = () => {
   if (!triggerRef.value) return
-  
+
   const rect = triggerRef.value.getBoundingClientRect()
   const panelWidth = 340
   const panelHeight = 380
-  
+
   // 面板显示在按钮左侧
   let left = rect.left - panelWidth - 8
   // 垂直居中对齐按钮
   let top = rect.top + rect.height / 2 - panelHeight / 2
-  
+
   // 如果左边空间不足，显示在按钮右侧
   if (left < 16) {
     left = rect.right + 8
   }
-  
+
   // 如果上方超出
   if (top < 16) {
     top = 16
   }
-  
+
   // 如果下方超出
   if (top + panelHeight > window.innerHeight - 16) {
     top = window.innerHeight - panelHeight - 16
   }
-  
+
   panelPosition.value = { top, left }
 }
 
@@ -72,7 +74,7 @@ const togglePanel = async () => {
 
 const handleSelect = (sticker: Sticker) => {
   const content = sticker.shortcode || sticker.alt || sticker.name
-  
+
   // 尝试多种方式获取 Vditor 实例
   // 方式1: 通过 DOM 元素的 Vditor 属性
   const vditorEl = document.querySelector('#vditor')
@@ -85,11 +87,12 @@ const handleSelect = (sticker: Sticker) => {
       return
     }
   }
-  
+
   // 方式2: 直接操作编辑区域
-  const editArea = document.querySelector('#plugin-vditor-mde .vditor-ir .vditor-reset') ||
-                   document.querySelector('#plugin-vditor-mde .vditor-wysiwyg .vditor-reset') ||
-                   document.querySelector('#plugin-vditor-mde .vditor-sv .vditor-reset')
+  const editArea =
+    document.querySelector('#plugin-vditor-mde .vditor-ir .vditor-reset') ||
+    document.querySelector('#plugin-vditor-mde .vditor-wysiwyg .vditor-reset') ||
+    document.querySelector('#plugin-vditor-mde .vditor-sv .vditor-reset')
   if (editArea) {
     // 使用 execCommand 插入文本
     const selection = window.getSelection()
@@ -107,7 +110,7 @@ const handleSelect = (sticker: Sticker) => {
       return
     }
   }
-  
+
   console.warn('[editor-sticker] Cannot insert to Vditor')
   showPanel.value = false
 }
@@ -126,40 +129,40 @@ const handleClickOutside = (e: MouseEvent) => {
 onMounted(async () => {
   await loadPluginConfig()
   isEnabled.value = pluginConfig.value.enableVditorEditor !== false
-  
+
   if (!isEnabled.value) return
-  
+
   await loadStickers()
-  
+
   // 检查是否在 Vditor 页面
   checkVditorPage()
-  
+
   // 监听 DOM 变化
   observer = new MutationObserver(() => {
     checkVditorPage()
   })
-  
+
   observer.observe(document.body, {
     childList: true,
-    subtree: true
+    subtree: true,
   })
-  
+
   // 监听路由变化 (popstate 和 hashchange)
   window.addEventListener('popstate', checkVditorPage)
   window.addEventListener('hashchange', checkVditorPage)
-  
+
   // 监听 history.pushState 和 replaceState
   const originalPushState = history.pushState
   const originalReplaceState = history.replaceState
-  history.pushState = function(...args) {
+  history.pushState = function (...args) {
     originalPushState.apply(this, args)
     setTimeout(checkVditorPage, 50)
   }
-  history.replaceState = function(...args) {
+  history.replaceState = function (...args) {
     originalReplaceState.apply(this, args)
     setTimeout(checkVditorPage, 50)
   }
-  
+
   document.addEventListener('click', handleClickOutside)
 })
 
@@ -182,10 +185,13 @@ onUnmounted(() => {
     @click.stop="togglePanel"
   >
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-      <path fill="currentColor" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm3.5-9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-7 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+      <path
+        fill="currentColor"
+        d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm3.5-9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-7 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"
+      />
     </svg>
   </button>
-  
+
   <!-- 表情面板 -->
   <StickerPanel
     v-if="isEnabled && isVditorPage"
@@ -226,5 +232,4 @@ onUnmounted(() => {
   background: #e5e7eb;
   color: #3b82f6;
 }
-
 </style>

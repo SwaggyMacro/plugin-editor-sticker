@@ -1,4 +1,4 @@
-import { definePlugin } from '@halo-dev/console-shared'
+import { definePlugin } from '@halo-dev/ui-shared'
 import { createApp, type App, markRaw } from 'vue'
 import { StickerExtension } from './extensions/sticker-extension'
 import VditorStickerInjector from './components/VditorStickerInjector.vue'

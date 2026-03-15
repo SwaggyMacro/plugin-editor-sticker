@@ -2,7 +2,7 @@
 import { ref, onMounted, computed, nextTick } from 'vue'
 import axios from 'axios'
 import { VButton, VCard, VSpace, VModal, Toast, Dialog } from '@halo-dev/components'
-import type { AttachmentLike } from '@halo-dev/console-shared'
+import type { AttachmentLike } from '@halo-dev/ui-shared'
 import IconAddCircle from '~icons/ri/add-circle-line'
 import IconDeleteBin from '~icons/ri/delete-bin-line'
 import IconEdit from '~icons/ri/edit-line'
@@ -46,13 +46,13 @@ const editSticker = ref({
   text: '',
   previewUrl: '',
   originUrl: '',
-  emoticon: ''
+  emoticon: '',
 })
 
 // 新建分组表单
 const newGroup = ref({
   name: '',
-  type: 'image' as 'emoticon' | 'image'
+  type: 'image' as 'emoticon' | 'image',
 })
 
 // 新建表情表单
@@ -60,7 +60,7 @@ const newSticker = ref({
   text: '',
   previewUrl: '',
   originUrl: '',
-  emoticon: ''
+  emoticon: '',
 })
 
 // 当前是否在编辑模式（用于附件选择器回调）
@@ -204,9 +204,13 @@ const loadData = async () => {
 const saveData = async () => {
   loading.value = true
   try {
-    await axios.post('/apis/editor-sticker.ncii.cn/v1alpha1/custom-stickers', JSON.stringify(owoData.value), {
-      headers: { 'Content-Type': 'application/json' }
-    })
+    await axios.post(
+      '/apis/editor-sticker.ncii.cn/v1alpha1/custom-stickers',
+      JSON.stringify(owoData.value),
+      {
+        headers: { 'Content-Type': 'application/json' },
+      },
+    )
     Toast.success('保存成功')
   } catch (e) {
     console.error('Failed to save', e)
@@ -215,7 +219,6 @@ const saveData = async () => {
     loading.value = false
   }
 }
-
 
 const addGroup = () => {
   if (!newGroup.value.name.trim()) {
@@ -228,7 +231,7 @@ const addGroup = () => {
   }
   owoData.value[newGroup.value.name] = {
     type: newGroup.value.type,
-    container: []
+    container: [],
   }
   activeGroup.value = newGroup.value.name
   showAddGroupModal.value = false
@@ -249,16 +252,16 @@ const deleteGroup = (name: string) => {
         activeGroup.value = groupNames.value[0] || ''
       }
       await saveData()
-    }
+    },
   })
 }
 
 const addSticker = () => {
   if (!activeGroup.value || !currentGroup.value) return
-  
+
   const group = currentGroup.value
   let icon = ''
-  
+
   if (group.type === 'emoticon') {
     if (!newSticker.value.emoticon.trim()) {
       Toast.warning('请输入颜文字')
@@ -281,12 +284,12 @@ const addSticker = () => {
       icon = `<img src='${newSticker.value.previewUrl}' class="OwO-img">`
     }
   }
-  
+
   group.container.push({
     icon,
-    text: group.type === 'emoticon' ? newSticker.value.emoticon : newSticker.value.text
+    text: group.type === 'emoticon' ? newSticker.value.emoticon : newSticker.value.text,
   })
-  
+
   showAddStickerModal.value = false
   newSticker.value = { text: '', previewUrl: '', originUrl: '', emoticon: '' }
   saveData()
@@ -303,7 +306,7 @@ const deleteSticker = (index: number) => {
     onConfirm: async () => {
       currentGroup.value?.container.splice(index, 1)
       await saveData()
-    }
+    },
   })
 }
 
@@ -318,20 +321,20 @@ const openEditModal = (index: number) => {
   if (!currentGroup.value) return
   const item = currentGroup.value.container[index]
   editingIndex.value = index
-  
+
   if (currentGroup.value.type === 'emoticon') {
     editSticker.value = {
       text: item.text,
       previewUrl: '',
       originUrl: '',
-      emoticon: item.icon
+      emoticon: item.icon,
     }
   } else {
     editSticker.value = {
       text: item.text,
       previewUrl: getStickerPreview(item, 'image'),
       originUrl: getOriginUrl(item.icon),
-      emoticon: ''
+      emoticon: '',
     }
   }
   showEditStickerModal.value = true
@@ -340,10 +343,10 @@ const openEditModal = (index: number) => {
 // 保存编辑
 const saveEditSticker = () => {
   if (!currentGroup.value || editingIndex.value < 0) return
-  
+
   const group = currentGroup.value
   let icon = ''
-  
+
   if (group.type === 'emoticon') {
     if (!editSticker.value.emoticon.trim()) {
       Toast.warning('请输入颜文字')
@@ -365,12 +368,12 @@ const saveEditSticker = () => {
       icon = `<img src='${editSticker.value.previewUrl}' class="OwO-img">`
     }
   }
-  
+
   group.container[editingIndex.value] = {
     icon,
-    text: group.type === 'emoticon' ? editSticker.value.emoticon : editSticker.value.text
+    text: group.type === 'emoticon' ? editSticker.value.emoticon : editSticker.value.text,
   }
-  
+
   showEditStickerModal.value = false
   editingIndex.value = -1
   editSticker.value = { text: '', previewUrl: '', originUrl: '', emoticon: '' }
@@ -434,26 +437,28 @@ const deleteSelected = () => {
       selectedIndexes.value.clear()
       selectMode.value = false
       await saveData()
-    }
+    },
   })
 }
 
 // 移动选中项到顶部
 const moveSelectedToTop = async () => {
   if (!currentGroup.value || selectedIndexes.value.size === 0) return
-  
+
   const container = currentGroup.value.container
   const indexes = Array.from(selectedIndexes.value).sort((a, b) => a - b)
-  const items = indexes.map(i => container[i])
-  
+  const items = indexes.map((i) => container[i])
+
   // 从大到小删除，避免索引变化
-  Array.from(selectedIndexes.value).sort((a, b) => b - a).forEach(i => {
-    container.splice(i, 1)
-  })
-  
+  Array.from(selectedIndexes.value)
+    .sort((a, b) => b - a)
+    .forEach((i) => {
+      container.splice(i, 1)
+    })
+
   // 插入到顶部
   container.unshift(...items)
-  
+
   // 更新选中索引
   selectedIndexes.value = new Set(items.map((_, i) => i))
   await saveData()
@@ -462,19 +467,21 @@ const moveSelectedToTop = async () => {
 // 移动选中项到底部
 const moveSelectedToBottom = async () => {
   if (!currentGroup.value || selectedIndexes.value.size === 0) return
-  
+
   const container = currentGroup.value.container
   const indexes = Array.from(selectedIndexes.value).sort((a, b) => a - b)
-  const items = indexes.map(i => container[i])
-  
+  const items = indexes.map((i) => container[i])
+
   // 从大到小删除，避免索引变化
-  Array.from(selectedIndexes.value).sort((a, b) => b - a).forEach(i => {
-    container.splice(i, 1)
-  })
-  
+  Array.from(selectedIndexes.value)
+    .sort((a, b) => b - a)
+    .forEach((i) => {
+      container.splice(i, 1)
+    })
+
   // 插入到底部
   container.push(...items)
-  
+
   // 更新选中索引
   const startIndex = container.length - items.length
   selectedIndexes.value = new Set(items.map((_, i) => startIndex + i))
@@ -519,41 +526,47 @@ const handleDragEnd = () => {
 // 放置
 const handleDrop = async (e: DragEvent, index: number) => {
   e.preventDefault()
-  
+
   if (!currentGroup.value || dragIndex.value === -1) {
     dragIndex.value = -1
     dragOverIndex.value = -1
     return
   }
-  
+
   const container = currentGroup.value.container
-  
+
   // 多选模式下拖拽选中项
-  if (selectMode.value && selectedIndexes.value.size > 0 && selectedIndexes.value.has(dragIndex.value)) {
+  if (
+    selectMode.value &&
+    selectedIndexes.value.size > 0 &&
+    selectedIndexes.value.has(dragIndex.value)
+  ) {
     const indexes = Array.from(selectedIndexes.value).sort((a, b) => a - b)
-    
+
     // 如果目标位置在选中项中，不做任何操作
     if (selectedIndexes.value.has(index)) {
       dragIndex.value = -1
       dragOverIndex.value = -1
       return
     }
-    
-    const items = indexes.map(i => container[i])
-    
+
+    const items = indexes.map((i) => container[i])
+
     // 计算目标位置（考虑删除后的索引变化）
     let targetIndex = index
-    const deletedBefore = indexes.filter(i => i < index).length
+    const deletedBefore = indexes.filter((i) => i < index).length
     targetIndex -= deletedBefore
-    
+
     // 从大到小删除
-    indexes.sort((a, b) => b - a).forEach(i => {
-      container.splice(i, 1)
-    })
-    
+    indexes
+      .sort((a, b) => b - a)
+      .forEach((i) => {
+        container.splice(i, 1)
+      })
+
     // 插入到目标位置
     container.splice(targetIndex, 0, ...items)
-    
+
     // 更新选中索引
     selectedIndexes.value = new Set(items.map((_, i) => targetIndex + i))
   } else if (!selectMode.value) {
@@ -563,12 +576,12 @@ const handleDrop = async (e: DragEvent, index: number) => {
       dragOverIndex.value = -1
       return
     }
-    
+
     const item = container.splice(dragIndex.value, 1)[0]
     const targetIndex = dragIndex.value < index ? index - 1 : index
     container.splice(targetIndex, 0, item)
   }
-  
+
   dragIndex.value = -1
   dragOverIndex.value = -1
   await saveData()
@@ -612,7 +625,6 @@ const exportJson = () => {
 onMounted(loadData)
 </script>
 
-
 <template>
   <div class="sticker-manager">
     <VCard :title="'自定义表情管理'" :loading="loading">
@@ -626,7 +638,7 @@ onMounted(loadData)
           </VButton>
         </VSpace>
       </template>
-      
+
       <div class="manager-content">
         <!-- 分组列表 -->
         <div class="group-sidebar">
@@ -639,38 +651,65 @@ onMounted(loadData)
               @click="activeGroup = name"
             >
               <span class="group-name">{{ name }}</span>
-              <span class="group-type">{{ owoData[name].type === 'emoticon' ? '颜文字' : '图片' }}</span>
+              <span class="group-type">{{
+                owoData[name].type === 'emoticon' ? '颜文字' : '图片'
+              }}</span>
               <button class="delete-btn" @click.stop="deleteGroup(name)">
                 <IconDeleteBin />
               </button>
             </div>
           </div>
         </div>
-        
+
         <!-- 表情列表 -->
         <div class="sticker-content">
           <div v-if="!activeGroup" class="empty-tip">请选择或创建一个分组</div>
           <template v-else-if="currentGroup">
             <div class="sticker-header">
-              <span>{{ activeGroup }} ({{ currentGroup.container.length }} 个表情)<template v-if="selectMode && selectedIndexes.size > 0">，已选 {{ selectedIndexes.size }} 个</template></span>
+              <span
+                >{{ activeGroup }} ({{ currentGroup.container.length }} 个表情)<template
+                  v-if="selectMode && selectedIndexes.size > 0"
+                  >，已选 {{ selectedIndexes.size }} 个</template
+                ></span
+              >
               <VSpace>
                 <template v-if="selectMode">
                   <VButton size="sm" @click="toggleSelectAll">
-                    {{ selectedIndexes.size === currentGroup.container.length ? '取消全选' : '全选' }}
+                    {{
+                      selectedIndexes.size === currentGroup.container.length ? '取消全选' : '全选'
+                    }}
                   </VButton>
-                  <VButton size="sm" :disabled="selectedIndexes.size === 0" @click="moveSelectedToTop">
+                  <VButton
+                    size="sm"
+                    :disabled="selectedIndexes.size === 0"
+                    @click="moveSelectedToTop"
+                  >
                     移至顶部
                   </VButton>
-                  <VButton size="sm" :disabled="selectedIndexes.size === 0" @click="moveSelectedToBottom">
+                  <VButton
+                    size="sm"
+                    :disabled="selectedIndexes.size === 0"
+                    @click="moveSelectedToBottom"
+                  >
                     移至底部
                   </VButton>
-                  <VButton size="sm" type="danger" :disabled="selectedIndexes.size === 0" @click="deleteSelected">
+                  <VButton
+                    size="sm"
+                    type="danger"
+                    :disabled="selectedIndexes.size === 0"
+                    @click="deleteSelected"
+                  >
                     删除 ({{ selectedIndexes.size }})
                   </VButton>
                   <VButton size="sm" @click="toggleSelectMode">取消</VButton>
                 </template>
                 <template v-else>
-                  <VButton v-if="currentGroup.container.length > 0" size="sm" @click="toggleSelectMode">多选</VButton>
+                  <VButton
+                    v-if="currentGroup.container.length > 0"
+                    size="sm"
+                    @click="toggleSelectMode"
+                    >多选</VButton
+                  >
                   <VButton size="sm" type="primary" @click="showAddStickerModal = true">
                     <template #icon><IconAddCircle /></template>
                     添加表情
@@ -683,10 +722,18 @@ onMounted(loadData)
                 v-for="(item, index) in currentGroup.container"
                 :key="index"
                 class="sticker-item"
-                :class="{ 
+                :class="{
                   selected: selectMode && selectedIndexes.has(index),
-                  dragging: dragIndex === index || (selectMode && selectedIndexes.has(index) && dragIndex !== -1 && selectedIndexes.has(dragIndex)),
-                  'drag-over': dragOverIndex === index && dragIndex !== index && !(selectMode && selectedIndexes.has(index))
+                  dragging:
+                    dragIndex === index ||
+                    (selectMode &&
+                      selectedIndexes.has(index) &&
+                      dragIndex !== -1 &&
+                      selectedIndexes.has(dragIndex)),
+                  'drag-over':
+                    dragOverIndex === index &&
+                    dragIndex !== index &&
+                    !(selectMode && selectedIndexes.has(index)),
                 }"
                 :draggable="!selectMode || selectedIndexes.has(index)"
                 @click="selectMode ? toggleSelect(index, $event) : undefined"
@@ -696,7 +743,11 @@ onMounted(loadData)
                 @dragend="handleDragEnd"
                 @drop="handleDrop($event, index)"
               >
-                <div v-if="selectMode" class="select-checkbox" :class="{ checked: selectedIndexes.has(index) }">
+                <div
+                  v-if="selectMode"
+                  class="select-checkbox"
+                  :class="{ checked: selectedIndexes.has(index) }"
+                >
                   <span v-if="selectedIndexes.has(index)">✓</span>
                 </div>
                 <div v-if="!selectMode" class="drag-handle" title="拖拽排序">⋮⋮</div>
@@ -721,7 +772,7 @@ onMounted(loadData)
         </div>
       </div>
     </VCard>
-    
+
     <!-- 新建分组弹窗 -->
     <VModal v-model:visible="showAddGroupModal" title="新建分组" @close="showAddGroupModal = false">
       <div class="form-item">
@@ -743,13 +794,20 @@ onMounted(loadData)
       </template>
     </VModal>
 
-    
     <!-- 添加表情弹窗 -->
-    <VModal v-model:visible="showAddStickerModal" title="添加表情" @close="showAddStickerModal = false">
+    <VModal
+      v-model:visible="showAddStickerModal"
+      title="添加表情"
+      @close="showAddStickerModal = false"
+    >
       <template v-if="currentGroup?.type === 'emoticon'">
         <div class="form-item">
           <label>颜文字</label>
-          <input v-model="newSticker.emoticon" class="form-input" placeholder="输入颜文字，如 (⌐■_■)" />
+          <input
+            v-model="newSticker.emoticon"
+            class="form-input"
+            placeholder="输入颜文字，如 (⌐■_■)"
+          />
         </div>
       </template>
       <template v-else>
@@ -760,14 +818,22 @@ onMounted(loadData)
         <div class="form-item">
           <label>预览图</label>
           <div class="upload-row">
-            <input v-model="newSticker.previewUrl" class="form-input" placeholder="输入 URL 或从附件库选择" />
+            <input
+              v-model="newSticker.previewUrl"
+              class="form-input"
+              placeholder="输入 URL 或从附件库选择"
+            />
             <VButton size="sm" @click="openPreviewSelector">选择</VButton>
           </div>
         </div>
         <div class="form-item">
           <label>原图（可选，用于文章显示）</label>
           <div class="upload-row">
-            <input v-model="newSticker.originUrl" class="form-input" placeholder="输入 URL 或从附件库选择，留空则使用预览图" />
+            <input
+              v-model="newSticker.originUrl"
+              class="form-input"
+              placeholder="输入 URL 或从附件库选择，留空则使用预览图"
+            />
             <VButton size="sm" @click="openOriginSelector">选择</VButton>
           </div>
         </div>
@@ -782,13 +848,21 @@ onMounted(loadData)
         </VSpace>
       </template>
     </VModal>
-    
+
     <!-- 编辑表情弹窗 -->
-    <VModal v-model:visible="showEditStickerModal" title="编辑表情" @close="showEditStickerModal = false">
+    <VModal
+      v-model:visible="showEditStickerModal"
+      title="编辑表情"
+      @close="showEditStickerModal = false"
+    >
       <template v-if="currentGroup?.type === 'emoticon'">
         <div class="form-item">
           <label>颜文字</label>
-          <input v-model="editSticker.emoticon" class="form-input" placeholder="输入颜文字，如 (⌐■_■)" />
+          <input
+            v-model="editSticker.emoticon"
+            class="form-input"
+            placeholder="输入颜文字，如 (⌐■_■)"
+          />
         </div>
       </template>
       <template v-else>
@@ -799,14 +873,22 @@ onMounted(loadData)
         <div class="form-item">
           <label>预览图</label>
           <div class="upload-row">
-            <input v-model="editSticker.previewUrl" class="form-input" placeholder="输入 URL 或从附件库选择" />
+            <input
+              v-model="editSticker.previewUrl"
+              class="form-input"
+              placeholder="输入 URL 或从附件库选择"
+            />
             <VButton size="sm" @click="openEditPreviewSelector">选择</VButton>
           </div>
         </div>
         <div class="form-item">
           <label>原图（可选，用于文章显示）</label>
           <div class="upload-row">
-            <input v-model="editSticker.originUrl" class="form-input" placeholder="输入 URL 或从附件库选择，留空则使用预览图" />
+            <input
+              v-model="editSticker.originUrl"
+              class="form-input"
+              placeholder="输入 URL 或从附件库选择，留空则使用预览图"
+            />
             <VButton size="sm" @click="openEditOriginSelector">选择</VButton>
           </div>
         </div>
@@ -821,12 +903,17 @@ onMounted(loadData)
         </VSpace>
       </template>
     </VModal>
-    
+
     <!-- 导入 JSON 弹窗 -->
     <VModal v-model:visible="showImportModal" title="导入 JSON" @close="showImportModal = false">
       <div class="form-item">
         <label>粘贴 OwO.json 内容</label>
-        <textarea v-model="importJson" class="json-textarea" rows="10" placeholder="粘贴 JSON 内容"></textarea>
+        <textarea
+          v-model="importJson"
+          class="json-textarea"
+          rows="10"
+          placeholder="粘贴 JSON 内容"
+        ></textarea>
       </div>
       <template #footer>
         <VSpace>
@@ -835,7 +922,7 @@ onMounted(loadData)
         </VSpace>
       </template>
     </VModal>
-    
+
     <!-- 预览图附件选择器 -->
     <AttachmentSelectorModal
       v-model:visible="showPreviewSelector"
@@ -844,7 +931,7 @@ onMounted(loadData)
       @select="handlePreviewSelect"
       @close="handlePreviewSelectorClose"
     />
-    
+
     <!-- 原图附件选择器 -->
     <AttachmentSelectorModal
       v-model:visible="showOriginSelector"
@@ -887,26 +974,26 @@ onMounted(loadData)
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s;
-  
+
   &:hover {
     background: #f3f4f6;
   }
-  
+
   &.active {
     background: #e5e7eb;
   }
-  
+
   .group-name {
     flex: 1;
     font-weight: 500;
   }
-  
+
   .group-type {
     font-size: 12px;
     color: #9ca3af;
     margin-right: 8px;
   }
-  
+
   .delete-btn {
     opacity: 0;
     background: none;
@@ -914,12 +1001,12 @@ onMounted(loadData)
     cursor: pointer;
     color: #ef4444;
     padding: 4px;
-    
+
     &:hover {
       color: #dc2626;
     }
   }
-  
+
   &:hover .delete-btn {
     opacity: 1;
   }
@@ -954,31 +1041,31 @@ onMounted(loadData)
   border-radius: 8px;
   cursor: default;
   transition: all 0.2s;
-  
+
   &.selected {
     border-color: #3b82f6;
     background: #eff6ff;
   }
-  
+
   &.dragging {
     opacity: 0.5;
     border-style: dashed;
   }
-  
+
   &.drag-over {
     border-color: #3b82f6;
     background: #dbeafe;
     transform: scale(1.02);
   }
-  
-  &[draggable="true"] {
+
+  &[draggable='true'] {
     cursor: grab;
-    
+
     &:active {
       cursor: grabbing;
     }
   }
-  
+
   .drag-handle {
     position: absolute;
     top: 2px;
@@ -989,23 +1076,23 @@ onMounted(loadData)
     letter-spacing: -2px;
     cursor: grab;
     user-select: none;
-    
+
     &:active {
       cursor: grabbing;
     }
   }
-  
+
   &:hover .drag-handle {
     color: #9ca3af;
   }
-  
+
   img {
     width: 48px;
     height: 48px;
     object-fit: contain;
     pointer-events: none;
   }
-  
+
   .emoticon {
     font-size: 24px;
     height: 48px;
@@ -1013,7 +1100,7 @@ onMounted(loadData)
     align-items: center;
     pointer-events: none;
   }
-  
+
   .sticker-name {
     margin-top: 4px;
     font-size: 12px;
@@ -1024,7 +1111,7 @@ onMounted(loadData)
     white-space: nowrap;
     pointer-events: none;
   }
-  
+
   .select-checkbox {
     position: absolute;
     top: 4px;
@@ -1039,13 +1126,13 @@ onMounted(loadData)
     justify-content: center;
     font-size: 12px;
     color: #fff;
-    
+
     &.checked {
       background: #3b82f6;
       border-color: #3b82f6;
     }
   }
-  
+
   .action-btns {
     position: absolute;
     top: 4px;
@@ -1055,7 +1142,7 @@ onMounted(loadData)
     opacity: 0;
     transition: opacity 0.2s;
   }
-  
+
   .edit-btn,
   .delete-btn {
     background: #fff;
@@ -1067,23 +1154,23 @@ onMounted(loadData)
     align-items: center;
     justify-content: center;
   }
-  
+
   .edit-btn {
     color: #3b82f6;
-    
+
     &:hover {
       color: #2563eb;
     }
   }
-  
+
   .delete-btn {
     color: #ef4444;
-    
+
     &:hover {
       color: #dc2626;
     }
   }
-  
+
   &:hover .action-btns {
     opacity: 1;
   }
@@ -1099,7 +1186,7 @@ onMounted(loadData)
 
 .form-item {
   margin-bottom: 16px;
-  
+
   label {
     display: block;
     margin-bottom: 8px;
@@ -1116,7 +1203,7 @@ onMounted(loadData)
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
-  
+
   &:focus {
     border-color: #3b82f6;
   }
@@ -1139,7 +1226,7 @@ onMounted(loadData)
 .upload-row {
   display: flex;
   gap: 8px;
-  
+
   .form-input {
     flex: 1;
   }
@@ -1151,7 +1238,7 @@ onMounted(loadData)
   background: #f9fafb;
   border-radius: 6px;
   text-align: center;
-  
+
   img {
     max-width: 100px;
     max-height: 100px;

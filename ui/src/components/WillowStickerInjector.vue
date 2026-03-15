@@ -16,9 +16,11 @@ let observer: MutationObserver | null = null
 // 编辑器页面路由匹配
 const isEditorRoute = () => {
   const path = window.location.pathname
-  return path.includes('/posts/editor') || 
-         path.includes('/pages/editor') || 
-         path.includes('/singlepages/editor')
+  return (
+    path.includes('/posts/editor') ||
+    path.includes('/pages/editor') ||
+    path.includes('/singlepages/editor')
+  )
 }
 
 const checkWillowPage = () => {
@@ -28,34 +30,35 @@ const checkWillowPage = () => {
     return
   }
   // Willow MDE 编辑器的容器选择器
-  const willow = document.querySelector('.willow-mde') || 
-                 document.querySelector('[class*="willow"]') ||
-                 document.querySelector('.cm-editor')
+  const willow =
+    document.querySelector('.willow-mde') ||
+    document.querySelector('[class*="willow"]') ||
+    document.querySelector('.cm-editor')
   isWillowPage.value = !!willow
 }
 
 const updatePanelPosition = () => {
   if (!triggerRef.value) return
-  
+
   const rect = triggerRef.value.getBoundingClientRect()
   const panelWidth = 340
   const panelHeight = 380
-  
+
   let left = rect.left - panelWidth - 8
   let top = rect.top + rect.height / 2 - panelHeight / 2
-  
+
   if (left < 16) {
     left = rect.right + 8
   }
-  
+
   if (top < 16) {
     top = 16
   }
-  
+
   if (top + panelHeight > window.innerHeight - 16) {
     top = window.innerHeight - panelHeight - 16
   }
-  
+
   panelPosition.value = { top, left }
 }
 
@@ -69,7 +72,7 @@ const togglePanel = async () => {
 
 const handleSelect = (sticker: Sticker) => {
   const content = sticker.shortcode || sticker.alt || sticker.name
-  
+
   // Willow 使用 CodeMirror 6
   // 方式1: 通过 cm-content 找到 CodeMirror 编辑器
   const cmContent = document.querySelector('.cm-content') as HTMLElement
@@ -82,14 +85,14 @@ const handleSelect = (sticker: Sticker) => {
       const { from, to } = state.selection.main
       view.dispatch({
         changes: { from, to, insert: content },
-        selection: { anchor: from + content.length }
+        selection: { anchor: from + content.length },
       })
       view.focus()
       showPanel.value = false
       return
     }
   }
-  
+
   // 方式2: 直接操作 contenteditable
   const editArea = document.querySelector('.cm-content[contenteditable="true"]')
   if (editArea) {
@@ -108,7 +111,7 @@ const handleSelect = (sticker: Sticker) => {
       return
     }
   }
-  
+
   // 方式3: 通过 textarea (如果有)
   const textarea = document.querySelector('.willow-mde textarea') as HTMLTextAreaElement
   if (textarea) {
@@ -122,7 +125,7 @@ const handleSelect = (sticker: Sticker) => {
     showPanel.value = false
     return
   }
-  
+
   console.warn('[editor-sticker] Cannot insert to Willow MDE')
   showPanel.value = false
 }
@@ -141,37 +144,37 @@ const handleClickOutside = (e: MouseEvent) => {
 onMounted(async () => {
   await loadPluginConfig()
   isEnabled.value = pluginConfig.value.enableWillowEditor !== false
-  
+
   if (!isEnabled.value) return
-  
+
   await loadStickers()
-  
+
   checkWillowPage()
-  
+
   observer = new MutationObserver(() => {
     checkWillowPage()
   })
-  
+
   observer.observe(document.body, {
     childList: true,
-    subtree: true
+    subtree: true,
   })
-  
+
   // 监听路由变化
   window.addEventListener('popstate', checkWillowPage)
   window.addEventListener('hashchange', checkWillowPage)
-  
+
   const originalPushState = history.pushState
   const originalReplaceState = history.replaceState
-  history.pushState = function(...args) {
+  history.pushState = function (...args) {
     originalPushState.apply(this, args)
     setTimeout(checkWillowPage, 50)
   }
-  history.replaceState = function(...args) {
+  history.replaceState = function (...args) {
     originalReplaceState.apply(this, args)
     setTimeout(checkWillowPage, 50)
   }
-  
+
   document.addEventListener('click', handleClickOutside)
 })
 
@@ -195,10 +198,13 @@ onUnmounted(() => {
     @click.stop="togglePanel"
   >
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-      <path fill="currentColor" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm3.5-9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-7 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+      <path
+        fill="currentColor"
+        d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm3.5-9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-7 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"
+      />
     </svg>
   </button>
-  
+
   <StickerPanel
     v-if="isEnabled && isWillowPage"
     :visible="showPanel"
