@@ -5,6 +5,12 @@ plugins {
 
 group 'cn.ncii.editorsticker.ui'
 
+tasks.named('pnpmInstall') {
+    // pnpm symlinked node_modules can contain optional package links that are not always resolvable on Windows.
+    // Gradle state tracking may fail when probing these paths, so disable task state tracking.
+    doNotTrackState("pnpm node_modules layout may be partially unreadable on Windows")
+}
+
 tasks.register('pnpmBuild', PnpmTask) {
     group = 'build'
     description = 'Build the UI project using pnpm'
