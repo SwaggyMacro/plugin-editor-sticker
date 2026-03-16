@@ -27,9 +27,7 @@ const filteredStickers = computed(() => {
   if (!searchKeyword.value) return currentGroup.value.stickers
   const keyword = searchKeyword.value.toLowerCase()
   return currentGroup.value.stickers.filter(
-    (s) =>
-      s.name.toLowerCase().includes(keyword) ||
-      s.alt?.toLowerCase().includes(keyword)
+    (s) => s.name.toLowerCase().includes(keyword) || s.alt?.toLowerCase().includes(keyword),
   )
 })
 
@@ -65,7 +63,7 @@ const updatePreviewPosition = (event: MouseEvent) => {
   const offset = 15
   previewPosition.value = {
     x: event.clientX - offset,
-    y: event.clientY - offset
+    y: event.clientY - offset,
   }
 }
 
@@ -89,7 +87,7 @@ watch(
       searchKeyword.value = ''
       previewSticker.value = null
     }
-  }
+  },
 )
 
 // 判断是否为图片表情
@@ -139,13 +137,11 @@ const isImageSticker = (sticker: Sticker) => {
             <span v-else class="sticker-text">{{ sticker.alt || sticker.name }}</span>
           </button>
         </div>
-        <div v-if="filteredStickers.length === 0" class="sticker-panel__empty">
-          没有找到表情
-        </div>
+        <div v-if="filteredStickers.length === 0" class="sticker-panel__empty">没有找到表情</div>
       </div>
     </div>
   </Transition>
-  
+
   <!-- 预览窗 -->
   <Transition name="preview-fade">
     <div
@@ -285,7 +281,9 @@ const isImageSticker = (sticker: Sticker) => {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .fade-enter-from,
@@ -293,7 +291,6 @@ const isImageSticker = (sticker: Sticker) => {
   opacity: 0;
   transform: translateY(4px);
 }
-
 </style>
 
 <style lang="scss">

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -44,7 +45,7 @@ public class StickerContentHandler implements ReactivePostContentHandler {
     private static final Pattern ESCAPED_SHORTCODE_PATTERN = Pattern.compile("\\\\:([a-zA-Z0-9_\\-\\u4e00-\\u9fa5]+)\\\\?:|:([a-zA-Z0-9_\\-\\u4e00-\\u9fa5]+)\\\\:");
 
     @Override
-    public Mono<PostContentContext> handle(PostContentContext context) {
+    public Mono<PostContentContext> handle(@NonNull PostContentContext context) {
         return loadStickerMapReactive()
             .map(stickerMap -> {
                 if (stickerMap.isEmpty()) {
@@ -64,11 +65,11 @@ public class StickerContentHandler implements ReactivePostContentHandler {
 
     
     private Mono<Map<String, String>> loadStickerMapReactive() {
-        return settingFetcher.get("basic")
+        return settingFetcher.getSettingValue("basic")
             .flatMap(setting -> {
                 // 缓存额外样式
                 if (setting.has("stickerStyle")) {
-                    cachedExtraStyle = setting.get("stickerStyle").asText("");
+                    cachedExtraStyle = setting.get("stickerStyle").asString("");
                 }
                 
                 // 检查是否启用自定义模式
@@ -82,7 +83,7 @@ public class StickerContentHandler implements ReactivePostContentHandler {
                     return Mono.just(Map.<String, String>of());
                 }
                 
-                String configUrl = setting.get("stickerConfigUrl").asText("");
+                String configUrl = setting.get("stickerConfigUrl").asString("");
                 if (configUrl == null || configUrl.isEmpty()) {
                     return Mono.just(Map.<String, String>of());
                 }
@@ -124,7 +125,10 @@ public class StickerContentHandler implements ReactivePostContentHandler {
         return client.fetch(run.halo.app.extension.ConfigMap.class, "editor-sticker-custom-data")
             .map(configMap -> {
                 try {
-                    String data = configMap.getData().get("stickers");
+                    String data = null;
+                    if (configMap.getData() != null) {
+                        data = configMap.getData().get("stickers");
+                    }
                     if (data == null || data.isEmpty()) {
                         return Map.<String, String>of();
                     }

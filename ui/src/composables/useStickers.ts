@@ -65,7 +65,7 @@ const defaultStickerGroups: StickerGroup[] = [
       { name: '(｀・ω・´)', url: '', alt: '(｀・ω・´)' },
       { name: '(´・ω・`)', url: '', alt: '(´・ω・`)' },
       { name: '(=^･ω･^=)', url: '', alt: '(=^･ω･^=)' },
-      { name: '(●\'◡\'●)', url: '', alt: '(●\'◡\'●)' },
+      { name: "(●'◡'●)", url: '', alt: "(●'◡'●)" },
     ],
   },
 ]
@@ -100,23 +100,24 @@ export function useStickers() {
       if (Object.keys(config).length === 0) {
         config = await loadPluginConfig()
       }
-      
+
       // 自定义模式：从自定义数据加载
       if (config.enableCustomMode) {
         console.log('[editor-sticker] Loading stickers from custom mode')
         try {
           const customRes = await axios.get('/apis/editor-sticker.ncii.cn/v1alpha1/custom-stickers')
-          const customData = typeof customRes.data === 'string' ? JSON.parse(customRes.data) : customRes.data
+          const customData =
+            typeof customRes.data === 'string' ? JSON.parse(customRes.data) : customRes.data
           if (Object.keys(customData).length > 0) {
             stickerGroups.value = parseOwoConfig(customData)
             loaded.value = true
             return
           }
-        } catch (e) {
+        } catch {
           console.warn('[editor-sticker] Failed to load custom stickers, fallback to default')
         }
       }
-      
+
       if (configUrl) {
         const response = await axios.get(configUrl)
         const owoData = response.data
@@ -142,11 +143,11 @@ export function useStickers() {
       loading.value = false
     }
   }
-  
+
   const isDefaultEditorEnabled = () => {
     return pluginConfig.value.enableDefaultEditor !== false
   }
-  
+
   const isVditorEditorEnabled = () => {
     return pluginConfig.value.enableVditorEditor !== false
   }
@@ -179,7 +180,7 @@ export function useStickers() {
 
   // 解析 OwO 格式的配置 (支持两种格式)
   const parseOwoConfig = (
-    owoData: Record<string, OwoGroup | Record<string, string>>
+    owoData: Record<string, OwoGroup | Record<string, string>>,
   ): StickerGroup[] => {
     const groups: StickerGroup[] = []
 
@@ -203,7 +204,7 @@ export function useStickers() {
             const originMatch = item.icon.match(/origin=["']([^"']+)["']/)
             const srcMatch = item.icon.match(/src=["']([^"']+)["']/)
             // 原图 URL（用于插入文章）
-            const originUrl = originMatch ? originMatch[1] : (srcMatch ? srcMatch[1] : '')
+            const originUrl = originMatch ? originMatch[1] : srcMatch ? srcMatch[1] : ''
             // 预览图 URL（用于面板显示）
             const previewUrl = srcMatch ? srcMatch[1] : originUrl
             // 处理协议相对 URL
